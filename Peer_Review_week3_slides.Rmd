@@ -1,0 +1,66 @@
+---
+title: "Sleep Cycles"
+author: "Mathieu C."
+date: "1/17/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+## Data exploration using a 3d scatterplot
+
+### Advantages
+
+- Allows to see the shape of some distributions better than with a traditional scatterplot
+- Can show up to 5 dimensions in a (somewhat) interpretable fashion (x,y,z,color,shape)
+- Is fun to play with
+
+## Description
+
+### What we're looking at:
+The data in the following slide comes from the `msleep` database, it is one of the databases included in R and accessible through the `data()`function.
+
+### A glimpse into the database
+Columns 1-5 from `msleep` are factors (name, genus, alimentation method, order and conservation status, respectively)
+
+Columns 6-11 are numeric and represent different aspects of the sleep cycle of the observed animals. These are the ones we're going to use.  
+
+## Data informations and transformations
+
+Because we need values in all three dimensions to build the plot, we'll quickly remove unwanted rows containing `NA`'s using the `complete.case()` function beforehand, resulting in 30 rows of data and 11 variables.  
+  
+The values plotted are:
+
+1. X : sleep_cycle which is the length of one sleep cycle in minutes (transformed from hours)
+2. Y : sleep_total which is the ammount of sleep in minutes (transformed from hours)
+3. Z : bodywt which is the body weight in $log_2(kilogramms)$ (transformed to reduce skew)
+
+## The plot:
+
+```{r cycles, echo=FALSE, warning=FALSE, comment="",message=FALSE}
+require(plotly)
+data("msleep")
+cc <- complete.cases(msleep[,c("sleep_cycle", "sleep_total", "bodywt", "brainwt")])
+df.cc <- msleep[cc,]
+
+p <- plot_ly(data=df.cc, x=df.cc$sleep_cycle*60, y=df.cc$sleep_total*60,
+             z=log(df.cc$bodywt,2), 
+             type = "scatter3d",
+             color = df.cc$brainwt*1000) %>%
+        layout(title = "Animal Sleep Patterns\nColored by Brain Weight in gramms:",
+               scene= list(
+                       xaxis = list(title = "X: Sleep Cycle (minutes)"),
+                       yaxis = list(title = "Y: Sleep Total (minutes)"),
+                       zaxis = list(title ="Z: Body Weight (log2(kilogramms))")
+                       )
+               )
+p
+```
+  
+## Conclusions, Observations
+With this 3d Scatterplot covering 4 dimensions, you can already observe trends between the observed variables like `sleep_total` and `bodywt` (cor = 0.60) or `brainwt` and `sleep_cycle` (cor = 0.85).  
+  
+`plot_ly()` is a fun and efficient way to create such a plot within minutes.
+
+Thank you for your attention.
